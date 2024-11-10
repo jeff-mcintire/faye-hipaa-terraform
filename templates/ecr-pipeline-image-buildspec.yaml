@@ -1,0 +1,26 @@
+version: 0.2
+# env:
+#   parameter-store:
+#     DOCKER_HUB_USR: "/codebuild/DOCKER_HUB_USR"
+#     DOCKER_HUB_PWD: "/codebuild/DOCKER_HUB_PWD"        
+phases:
+  install:
+    runtime-versions:
+      docker: 19
+      # python: 3.9
+    commands:
+      # - yum -y install jq python3-pip python3-dev && pip3 install --upgrade awscli
+      - aws --version
+  pre_build:
+    commands:
+      - $(aws ecr get-login --no-include-email | sed 's|https://||')
+      # - docker login -u $DOCKER_HUB_USR -p $DOCKER_HUB_PWD
+  build:
+    commands:
+      - ls -ls
+      - "docker build --tag $IMAGE_REPO_NAME:$IMAGE_TAG ."
+      - "docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $REPOSITORY_URL:$IMAGE_TAG"
+      - "docker push $REPOSITORY_URL:$IMAGE_TAG"
+cache:
+  paths:
+    - "/root/.m2/**/*"
